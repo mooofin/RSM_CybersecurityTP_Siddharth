@@ -11,11 +11,11 @@ const DATA = 0x04
 const FIN = 0x05
 const FIN_ACK = 0x06
 
-# Configuration
+
 const TIMEOUT_SEC = 2.0
 const MAX_RETRIES = 5
 
-# Packet structure
+
 struct Packet
     type::UInt8
     seq_num::UInt32
@@ -45,7 +45,7 @@ function deserialize(data::Vector{UInt8})::Packet
     return Packet(type, seq_num, ack_num, payload)
 end
 
-# Connection state
+
 mutable struct Connection
     socket::UDPSocket
     local_port::UInt16
@@ -88,7 +88,7 @@ function recv_with_timeout(conn::Connection, timeout::Float64)::Union{Tuple, Not
 end
 
 
-# Send packet with retransmission
+
 function send_with_retry(conn::Connection, pkt::Packet, expected_type::UInt8)::Union{Packet, Nothing}
     data = serialize(pkt)
     
@@ -113,7 +113,7 @@ function send_with_retry(conn::Connection, pkt::Packet, expected_type::UInt8)::U
     return nothing
 end
 
-# ============== CLIENT FUNCTIONS ==============
+
 
 # Three-way handshake (client side)
 function connect_to_server(local_port::Int, remote_host::String, remote_port::Int)::Union{Connection, Nothing}
@@ -132,12 +132,12 @@ function connect_to_server(local_port::Int, remote_host::String, remote_port::In
         nothing
     )
     
-    # Start background receiver
+   
     start_receiver!(conn)
     
     println("\n=== Starting 3-Way Handshake (Client) ===")
     
-    # Step 1: Send SYN
+ 
     syn_pkt = Packet(SYN, conn.seq_num, 0, UInt8[])
     response = send_with_retry(conn, syn_pkt, SYN_ACK)
     
@@ -147,11 +147,11 @@ function connect_to_server(local_port::Int, remote_host::String, remote_port::In
         return nothing
     end
     
-    # Step 2: Received SYN-ACK, update state
+   
     conn.ack_num = response.seq_num + 1
     conn.seq_num += 1
     
-    # Step 3: Send ACK
+   
     ack_pkt = Packet(ACK, conn.seq_num, conn.ack_num, UInt8[])
     send(conn.socket, conn.remote_addr, conn.remote_port, serialize(ack_pkt))
     println("[SEND] ACK - Handshake complete!")
@@ -161,7 +161,7 @@ function connect_to_server(local_port::Int, remote_host::String, remote_port::In
     return conn
 end
 
-# Send data with sequencing and acknowledgement
+
 function send_data(conn::Connection, message::String)::Bool
     if !conn.connected
         println("[ERROR] Not connected")
@@ -188,7 +188,7 @@ function send_data(conn::Connection, message::String)::Bool
     return false
 end
 
-# Connection termination (client initiates)
+
 function disconnect(conn::Connection)::Bool
     if !conn.connected
         return true
@@ -196,7 +196,7 @@ function disconnect(conn::Connection)::Bool
     
     println("\n=== Connection Termination ===")
     
-    # Send FIN
+  
     fin_pkt = Packet(FIN, conn.seq_num, conn.ack_num, UInt8[])
     response = send_with_retry(conn, fin_pkt, FIN_ACK)
     
@@ -207,7 +207,7 @@ function disconnect(conn::Connection)::Bool
         return false
     end
     
-    # Send final ACK
+   
     conn.seq_num += 1
     conn.ack_num = response.seq_num + 1
     final_ack = Packet(ACK, conn.seq_num, conn.ack_num, UInt8[])
