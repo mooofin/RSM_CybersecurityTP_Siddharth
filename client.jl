@@ -1,10 +1,3 @@
-/* client.jl - TCP over UDP client implementation
- * Author: <redacted>
- * License: MIT
- *
- * Implements connection establishment, reliable data transfer with
- * retransmission, and graceful connection termination.
- */
 
 using Sockets
 
