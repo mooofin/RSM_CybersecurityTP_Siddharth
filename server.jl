@@ -1,10 +1,3 @@
-/* server.jl - TCP over UDP implementation
- * Author: <redacted>
- * License: MIT
- * 
- * Reliable transport layer over unreliable UDP datagrams.
- * Implements connection establishment, ordered delivery, and graceful shutdown.
- */
 
 using Sockets
 
